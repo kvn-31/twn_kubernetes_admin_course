@@ -106,3 +106,4 @@ only on control plane:
 - kubeadm is a tool to bootstrap a best-practises K8s cluster
 - is created and maintained by Kubernetes
 - cares about bootstrapping, not about provisioning machines
+
