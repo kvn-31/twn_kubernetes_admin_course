@@ -100,6 +100,18 @@ Kubernetes offers
 - control plane processes are much more important, but do not require as much resources as worker nodes
 - when application complexity increases, more worker nodes (and possibly also control planes) are needed
 
+## Regular Pod Scheduling
+- api server receives a request to create a pod
+- scheduler decides which node the pod should go to
+- kubelet on the node starts the pod
+
+## Static Pod Scheduling (for control plane components)
+- control plane components are started as static pods
+- kubelet watches a directory for pod definitions (/etc/kubernetes/manifests)
+- if it finds a manifest there, it starts the pod
+- kubelet also watches the static pod and restarts it if it dies
+- pod names are suffixed with the node hostname
+
 ## Create K8s Components
 - Kubernetes CLI (= imperative)
   - kubectl
