@@ -107,3 +107,61 @@ only on control plane:
 - is created and maintained by Kubernetes
 - cares about bootstrapping, not about provisioning machines
 
+## Provision and Setup Nodes
+- see [Documentation](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
+- `sudo swapoff -a` to disable swap on all nodes
+- open [required ports](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#check-required-ports)
+- in aws console -> security groups -> edit inbound rules
+  - for control plane node:
+    - TCP 6443, CIDR: 0.0.0.0/0 (all IPs)
+    - TCP 2379-2380, 10250, 10259 & 10257 with CIDR of the VPC (internal IPs)
+  - for worker nodes:
+    - TCP 10250, 10256, CIDR of the VPC
+    - TCP 30000-32767, 0.0.0.0/0 (all IPs)
+- for readability rename the hostnames
+  - connect to each node, `sudo vim /etc/hosts`
+  - get the private ip of each node and add the following lines
+```
+172.x.x.x controlplane
+172.x.x.x worker1
+172.x.x.x worker2
+```
+  - as a next step on each machine, update the hostname
+    - `sudo hostnamectl set-hostname controlplane` (replace controlplane with worker1 or worker2 for the other nodes)
+    - now exit and reconnect to the machine, the hostname should be updated (see the tab/machine name of the terminal)
+
+## Container Runtime
+- our applications run as containers
+- but also the K8s components run as containers
+- -> container runtime needs to be on worker and control plane nodes
+- CRI (Container Runtime Interface)
+  - abstracts the container runtime
+  - K8s can run with different container runtimes (containerd, cri-o, docker)
+  - Docker is not only a runtime, but an entire tech stack (can build applications etc) -> more lightweight runtimes emerged (containerd, cri-o)
+  - CRI defines rules what a container runtime must do to be compatible with K8s
+  - containerd is the most popular runtime -> no docker commands supported, but should not be necessary for us
+
+### Install Containerd
+- _the whole setup is added to the [install-containerd_mod_kevin.sh](install-containerd_mod_kevin.sh) script_
+- install [Pre-requisites](https://kubernetes.io/docs/setup/production-environment/container-runtimes/#install-and-configure-prerequisites)
+- in control plane node execute
+  - `cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+    net.ipv4.ip_forward = 1
+    EOF`
+  - `sudo sysctl --system`
+  - verify with `sysctl net.ipv4.ip_forward` (should return 1)
+  - install [Containerd](https://kubernetes.io/docs/setup/production-environment/container-runtimes/#containerd)
+  - also see [containerd documentation](https://github.com/containerd/containerd/blob/main/docs/getting-started.md)
+    - easier option is Option 2 - use apt-get/dnf
+    - `sudo apt-get update && sudo apt-get install containerd` installs containerd
+    - `sudo mkdir /etc/containerd` creates the directory for the configuration file
+    - `containerd config default | sudo tee /etc/containerd/config.toml` creates the default configuration file
+    - `sudo ls /etc/containerd/config.toml` to verify the file
+    - `sudo sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml` to enable systemd cgroups (see documentation) -> goes into file, finds string, replaces with true
+    - `sudo systemctl restart containerd` to restart containerd and apply changed configuration
+- do the same on the worker nodes -> easier using the [install-containerd_mod_kevin.sh](install-containerd_mod_kevin.sh) script
+  - use scp or create on node with `sudo vim install-containerd.sh` and paste the content
+  - make file executable with `sudo chmod +x install-containerd.sh`
+  - execute with `sudo ./install-containerd.sh`
+  - verify it is running `sudo systemctl status containerd.service`
+  - verify the config was updated correctly `sudo cat /etc/containerd/config.toml | grep SystemdCgroup`
