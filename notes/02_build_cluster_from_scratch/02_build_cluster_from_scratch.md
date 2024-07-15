@@ -142,7 +142,7 @@ only on control plane:
   - containerd is the most popular runtime -> no docker commands supported, but should not be necessary for us
 
 ### Install Containerd
-- _the whole setup is added to the [install-containerd_mod_kevin.sh](install-containerd_mod_kevin.sh) script_
+- _the whole setup for 1.28 is added to the [install-containerd_nana.sh](install-containerd_nana.sh) script_
 - install [Pre-requisites](https://kubernetes.io/docs/setup/production-environment/container-runtimes/#install-and-configure-prerequisites)
 - in control plane node execute
   - `cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
@@ -159,9 +159,32 @@ only on control plane:
     - `sudo ls /etc/containerd/config.toml` to verify the file
     - `sudo sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml` to enable systemd cgroups (see documentation) -> goes into file, finds string, replaces with true
     - `sudo systemctl restart containerd` to restart containerd and apply changed configuration
-- do the same on the worker nodes -> easier using the [install-containerd_mod_kevin.sh](install-containerd_mod_kevin.sh) script
+- do the same on the worker nodes -> easier using the [install-containerd_nana.sh](install-containerd_nana.sh) script
   - use scp or create on node with `sudo vim install-containerd.sh` and paste the content
   - make file executable with `sudo chmod +x install-containerd.sh`
   - execute with `sudo ./install-containerd.sh`
   - verify it is running `sudo systemctl status containerd.service`
   - verify the config was updated correctly `sudo cat /etc/containerd/config.toml | grep SystemdCgroup`
+
+## K8s Processes (kubeadm, kubelet and kubectl)
+- kubeadm needs to be installed on each node
+- initialize once with `kubeadm init` (on control plane node)
+  - orchestrates the whole cluster setup
+  - generates /etc/kubernetes folder
+  - generates self-signed CA
+  - generates static pod manifests
+  - kubelet will detect the manifest files and start the pods using containerd
+- quick definitions
+  - kubelet: starts and stops pods, runs on all machines
+  - kubeadm: CLI to initialize the cluster
+  - kubectl: CLI to talk to the cluster
+- see [documentation](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
+  - pick your Kubernetes version
+- for V1.28 see [install-k8s-components.sh](install-k8s-components.sh)
+  - create file using vim `vim install-k8s-components.sh`
+  - make file executable `chmod +x install-k8s-components.sh`
+  - execute `./install-k8s-components.sh`
+  - can be verified with `kubelet --version` and `kubeadm version` and `kubectl version`
+- initialize cluster on control plane
+  - `sudo kubeadm init`
+  - to see the kube-apiserver configuration `sudo cat /etc/kubernetes/manifests/kube-apiserver.yaml | less` -> can be changed/overwritten and kubelet will restart the pod

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-########################################################################
-# This script was modified by Kevin to fulfil the updated requirements #
-########################################################################
+#############################################################################
+# This script was modified by Kevin, please only use for newer K8s versions #
+#############################################################################
 
 # sysctl params required by setup, params persist across reboots
 cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
