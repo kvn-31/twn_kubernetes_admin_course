@@ -315,3 +315,17 @@ only on control plane:
 - `cilium status` -> after a few seconds this should show the OK status of the cilium pods
 - `kubectl get node` -> control plane should be status ready now
 - `kubectl get pods -n kube-system` -> all pods should be running
+
+## Join worker nodes
+- if not done yet `sudo swapoff -a` on worker nodes
+- `kubeadm join` command is provided after `kubeadm init` on the control plane node
+- if it is "lost" -> `kubeadm token create --print-join-command` on control plane node
+- copy command and execute on worker nodes -> is possible because the ports were opened in aws
+- running `kubectl -n kube-system exec -it cilium-xxxxx -- cilium-dbg status` shows that we cannot reach the cilium agent on the other node
+- -> ports for cilium need to be opened in the security group (see [cilium docs](https://docs.cilium.io/en/stable/operations/system_requirements/#firewall-rules))
+![security_group_control_plane.png](../assets/security_group_control_plane.png)
+- after applying the changes, the cilium agent should be reachable on the other node (might take some time)
+- `cilium connectivity test` -> should show all green (can take up to 15 minutes)
+- schedule a test pod
+  - `kubectl run test --image nginx`
+  - `kubectl get pod -o wide` -> should show the test pod on a worker node
