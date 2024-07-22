@@ -35,6 +35,9 @@
 ### ROLLOUT
 - `kubectl rollout history <component type> <component-name>` - Show the history of a deployment, daemonset, or statefulset
 
+### AUTH
+- `kubectl auth can-i get pods --as <user>` - Check if a user can get pods
+
 ### Flags (that can be used for most commands)
 - `--show-labels` - Show labels
 - `--record` - Add a record to the deployment history (deprecated)
