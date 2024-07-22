@@ -122,3 +122,70 @@ spec:
     - secret needs to be in the same namespace as the Ingress resource
     - data keys need to be `tls.crt` and `tls.key`
     - values are file contents, base64 encoded, not file names
+
+## Setup Ingress
+- install `ingress-nginx` controller ([github](https://github.com/kubernetes/ingress-nginx)) on the control plane
+- `helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx`
+- `helm repo update`
+- `helm install ingress-nginx ingress-nginx/ingress-nginx`
+- `helm ls` to see the installed helm charts
+- `kubectl get pods` the ingress-nginx-controller pod should be added
+- `kubectl get svc` to see the two added services -> one is the LoadBalancer service
+- in this case we create a load balancer in AWS
+  - create target group in the LoadBalancer and choose the Protocol port that is shown with `kubectl get svc` for the ingress-nginx-controller which is mapped from port 80
+  - rest of the settings as done above (security group, listener, etc.)
+  - wait until the LoadBalancer is created and then use the DNS name to access the services -> it should show a 404 nginx page because the routes are not configured yet
+
+## Configure Routing with K8s Ingress Component
+- ingress component is like a configuration for the ingress controller
+- we define http rules that the ingress controller will use to route the traffic
+- simple rule for our case -> forward all traffic to the internal nginx service
+- for our internal service we use something like this
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  labels:
+    app: nginx
+    svc: test-nginx
+spec:
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 8080 # port on the service
+      targetPort: 80 # port on the pod (containerPort)
+```
+- to create the ingress config we run `kubectl create ingress my-app-ingress --rule=host/path=service:port --dry-run=client -o yaml > my-ingress.yaml` to generate a base yaml
+- then we can edit the file and add the host and path
+- see [my-ingress.yaml](my-ingress.yaml)
+- kubectl get ingress -> lists all available ingress configurations in the cluster
+- the load balancer dns should now route to the nginx welcome page
+
+## Configure a path (rewrite target)
+- if we want `/my-app` to route the traffic to the nginx service we can add a path to the ingress configuration
+- this still routes the traffic to the service, but does not remove the /my-app from the path
+- to enable this by default add the `nginx.ingress.kubernetes.io/rewrite-target: /` annotation to the ingress configuration
+
+## Ingress in Production
+- have one replica per worker node
+
+## Pre-requisite Helm
+- Helm is a package manager for K8s
+- a bundle of YAML files -> Helm Charts
+- to be used for common applications/deployments
+- public registries: Helm Hub, Artifact Hub
+- private registries: in organizations for example
+- second feature: Templating Engine
+  - with helm we can use a template YAML config and replace placeholders with values (example `{{ .Values.name }}`)
+  - values defined with a yaml file or using `--set` flag
+- this is also useful for different environments (dev, test, prod)
+- Helm structure:
+- mychart/
+  - Chart.yaml -> metadata
+  - values.yaml -> default values
+  - charts/ -> dependencies
+  - templates/ -> actual templates
+- to deploy use `helm install <chartname>`
+- Helm uses kubeconfig to connect to the cluster -> no special setup needed

@@ -43,3 +43,8 @@
 - `kubectl get pods -A | grep cilium` - List all pods with cilium in the name
 - `kubectl -n kube-system exec -it cilium-xxxxx -- cilium-dbg status` - Get the status of Cilium
 - `cilium connectivity test` - Test connectivity (can take up to 15 mins)
+
+## Helm
+- `helm ls` - List all helm releases
+- `helm install <release-name> <chart-name>` - Install a helm chart
+- `helm uninstall <release-name>` - Uninstall a helm release

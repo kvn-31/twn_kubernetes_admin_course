@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-app-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: / # rewrites the path so that it is routed correctly
+spec:
+  ingressClassName: "nginx" #any resources created can be found by nginx
+  rules:
+    - host: ingress-nginx-controller-lb-807164000.eu-central-1.elb.amazonaws.com # load balancer domain name
+      http:
+        paths:
+          - backend:
+              service:
+                name: nginx-service # our internal nginx-service
+                port:
+                  number: 8080 # the port we specified
+            path: /my-app # use / for root path
+            pathType: Exact
