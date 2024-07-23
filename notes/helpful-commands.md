@@ -4,6 +4,7 @@
   - exports the whole preview to a yaml file, which can then be edited and applied
   - some fields might need to be deleted such as `status` or `creationTimestamp`
   - quick hack for vim is to use `dd` to delete a line
+- `kubectl cluster-info` for ip addresses of control plane and CoreDns 
 
 ### GET
 - `kubectl get pods` - List all pods in the current namespace
@@ -38,7 +39,13 @@
 ### AUTH
 - `kubectl auth can-i get pods --as <user>` - Check if a user can get pods
 
+### CSR / certificate
+- `kubectl get csr` to see all CSR with their states
+- `kubectl certificate approve dev-tom` approve a certificate with name dev-tom
+- `kubectl get csr dev-tom -o yaml` print out the signed certificate in yaml format
+
 ### Flags (that can be used for most commands)
+- `kubectl options` print all options that are available globally
 - `--show-labels` - Show labels
 - `--record` - Add a record to the deployment history (deprecated)
 

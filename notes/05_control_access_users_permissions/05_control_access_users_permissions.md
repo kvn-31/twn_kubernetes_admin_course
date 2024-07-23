@@ -98,3 +98,33 @@ rules:
   - allows to send CertificateSigningRequests (CSR)
   - every user/program can send a request
 
+## Demo Project - Users & Permissions
+- we want to use the certificate auth method
+- goals:
+  - generate a client key for a user, sign it by K8s CA (by sending CSR), approve CSR, get signed certificate
+  - assign permissions to the user and validate the permissions
+  - create ServiceAccount & add permissions
+
+### Create User Account / Generate client key
+- the whole process is described in the [kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#normal-user)
+- `openssl genrsa -out dev-tom.key 2048` to generate a private key file
+- `openssl req -new -key dev-tom.key -subj "/CN=tom" -out dev-tom.csr` generate the CSR, the subject is Tom -> Name that K8s will use to validate the request
+- next step: create a resource for the CSR in kubernetes -> see [documentation](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#create-certificatessigningrequest)
+- [dev-tom-csr.yaml](dev-tom-csr.yaml)
+- `kubectl apply -f dev-tom-csr.yaml`
+- `kubectl get csr` -> is in pending state
+- `kubectl certificate approve dev-tom` approve a certificate with name dev-tom
+- `kubectl get csr dev-tom -o yaml` print out the signed certificate in yaml format
+  - copy the certificate and use in next command
+- `echo 'COPIEDCERTIFICATE' | base64 --decode > dev-tom.crt` decode the base64 certificate and save as crt file
+- `kubectl cluster-info` to get the cluster ip
+- `mv ~/.kube/config .` move the config to current folder temporarily to not override auth data that is stored in there with the next command(s)
+- `kubectl --server https://172.31.27.170:6443 --certificate-authority /etc/kubernetes/pki/ca.crt --client-certificate dev-tom.crt --client-key dev-tom.key get pod` use the certificates and key of user tom for the get pod command, should return a Forbidden error from the server
+- next step: create a kube config file for our user tom
+- `cp config dev-tom.conf` -> duplicate our admin config and replace values for user tom
+  - replace all accordances with admin user to dev-tom
+  - client-certificate-data: either replace with base64 encoded certificate (better) OR replace with client-certificate and link to the crt file (use absolute path)
+  - client-key-data: either replace with base64 encoded private key (better) OR replace with client-key and link to the .key file (use absolute path)
+  - `base64 dev-tom.crt | tr -d "\n"`to base64 encode
+- `kubectl --kubeconfig dev-tom.conf get pod`
+- ad kube admin we are done -> take kubeconfig, crt and key file and pass to user
