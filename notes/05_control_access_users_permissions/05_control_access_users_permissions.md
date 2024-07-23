@@ -80,3 +80,21 @@ rules:
 - `kubectl describe role <role-name>` to get more information about a role
 - check the privileges of the current user, if admin we can check for other users
 - `kubectl auth can-i get pods --as <user>` to check if a user can get pods
+
+## Other Authorization Modes
+- Node, ABAC, Webhook exist as well
+- further details can be found in [documentation](https://kubernetes.io/docs/reference/access-authn-authz/authorization/)
+- to see which modes are enabled the `etc/kubernetes/manifests/kube-apiserver.yaml` file can be checked (authorization-mode)
+
+## Certificates in Kubernetes
+- certificates are stored in the `etc/kubernetes/pki` directory
+- who signed all those certificates?
+  - kubeadm generated a CA for K8s cluster
+  - this CA is not globally trusted
+  - how is it working?
+  - -> all clients have a copy of K8s CA -> clients can verify the server certificate
+- K8s CAs are trusted within K8s by all components who have a copy of the CA
+- Certificates API
+  - allows to send CertificateSigningRequests (CSR)
+  - every user/program can send a request
+
