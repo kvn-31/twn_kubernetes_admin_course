@@ -122,9 +122,56 @@ rules:
 - `kubectl --server https://172.31.27.170:6443 --certificate-authority /etc/kubernetes/pki/ca.crt --client-certificate dev-tom.crt --client-key dev-tom.key get pod` use the certificates and key of user tom for the get pod command, should return a Forbidden error from the server
 - next step: create a kube config file for our user tom
 - `cp config dev-tom.conf` -> duplicate our admin config and replace values for user tom
-  - replace all accordances with admin user to dev-tom
+  - replace all occurrences with admin user to dev-tom
   - client-certificate-data: either replace with base64 encoded certificate (better) OR replace with client-certificate and link to the crt file (use absolute path)
   - client-key-data: either replace with base64 encoded private key (better) OR replace with client-key and link to the .key file (use absolute path)
   - `base64 dev-tom.crt | tr -d "\n"`to base64 encode
 - `kubectl --kubeconfig dev-tom.conf get pod`
-- ad kube admin we are done -> take kubeconfig, crt and key file and pass to user
+- as kube administrator we are done -> take kubeconfig, crt and key file and pass to user
+
+### Give User Permissions - ClusterRole & ClusterRoleBinding
+- to check in which ApiGroup a resource is check the [api documentation](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/)
+- `kubectl create clusterrole dev-cr --verb=get,list,create,update,delete --resource=deployment.apps,pods --dry-run=client -o yaml > dev-cr.yaml`
+- see edited file [05_control_access_users_permissions.md](05_control_access_users_permissions.md
+- apply the file
+- `kubectl create clusterrolebinding dev-crb --clusterrole=dev-cr --user=tom --dry-run=client -o yaml > dev-crb.yaml`
+- apply the file
+- `kubectl describe clusterrole dev-cr` and `kubectl describe clusterrolebinding dev-crb` can be helpful
+- `kubectl --kubeconfig dev-tom.conf get pod` works now
+
+### Check user permissions
+- `kubectl auth can-i create pod --as tom`
+
+### Create ServiceAccount
+- for non-human users such as a CICD tool we need a ServiceAccount
+- `kubectl create serviceaccount jenkins --dry-run=client -o yaml > jenkins-sa.yaml`
+- no changes needed (quite simple config), apply the file
+- we need to manually create a token as kubernetes secret
+- see [documentation](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#manually-create-a-long-lived-api-token-for-a-serviceaccount)
+- [jenkins-sa-token.yaml](jenkins-sa-token.yaml) applying this file will create the token for us
+- `kubectl describe sa jenkins` -> under Tokens we find the link
+- `kubectl get secret jenkins-token -o yaml` -> to find the whole token that was created
+- copy the token and base64 decode it, use this decoded token in the next step
+- `token=DECODEDTOKEVALUE` -> temporarily save as variable in linux
+- use the hack to move the kube config temporarily again (`mv ~/.kube/config .`)
+- `kubectl --server https://172.31.27.170:6443 --certificate-authority /etc/kubernetes/pki/ca.crt --token $token get pod` to test the service account, expected is Forbidden error
+- to create a kubeconfig use an existing one to duplicate (`cp dev-tom.conf jenkins.conf`)
+  - replace all occurrences of user
+  - remove client-certificate and client-key, instead use `token` and insert the token generated before
+```yaml
+# ... 
+users:
+- name: jenkins
+  user:
+    token: PASTEDTOKEN
+```
+- `kubectl --kubeconfig jenkins.conf get pod` -> again Forbidden error expected
+- the UserName of our Service account is `system:serviceaccount:default:jenkins` -> default is the namespace
+
+### Give ServiceAccount Permissions
+- copy the admin kubeconfig back to original location if not done already
+- `kubectl create role cicd-role --verb=create,update,list --resource=deployments.apps,services --dry-run=client -o yaml > cicd-role.yaml`
+- apply  the role [cicd-role.yaml](cicd-role.yaml)
+- `kubectl create rolebinding cicd-binding --role=cicd-role --serviceaccount=default:jenkins --dry-run=client -o yaml > cicd-binding.yaml`
+- apply the rolebinding [cicd-binding.yaml](cicd-binding.yaml)
+- `kubectl auth can-i create service --as system:serviceaccount:default:jenkins -n default`

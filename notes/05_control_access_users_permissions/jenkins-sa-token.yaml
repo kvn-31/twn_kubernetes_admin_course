@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jenkins-token
+  annotations:
+    kubernetes.io/service-account.name: jenkins # this needs to be the name of the ServiceAccount (already created)
+type: kubernetes.io/service-account-token
