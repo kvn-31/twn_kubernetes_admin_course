@@ -175,3 +175,4 @@ users:
 - `kubectl create rolebinding cicd-binding --role=cicd-role --serviceaccount=default:jenkins --dry-run=client -o yaml > cicd-binding.yaml`
 - apply the rolebinding [cicd-binding.yaml](cicd-binding.yaml)
 - `kubectl auth can-i create service --as system:serviceaccount:default:jenkins -n default`
+- as a Kubernetes administrator we would take the jenkins.conf file and hand over to the developers (or whoever is responsible for jenkins server)
