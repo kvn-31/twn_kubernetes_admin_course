@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template: # template for the pods
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+        - name: log-sidecar
+          image: busybox:1.28
+          command: ["sh", "-c", "while true; do echo sync app logs; sleep 20; done"]
+      initContainers:
+        - name: mydb-available
+          image: busybox:1.28
+          command: ["sh", "-c", "until nslookup mydb-service; do echo waiting for mydb; sleep 4; done"] #waits for mydb-service to be available
+

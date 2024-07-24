@@ -26,6 +26,7 @@
 ### LOGS
 - `kubectl logs <pod name>` - Get the logs of a pod
 - `kubectl logs -l <label>` - Get the logs of all pods with a specific label
+- `kubectl logs PODNAME -c log-sidecar` - Get the logs of a specific container in a pod
 
 ### EXEC
 - `kubectl exec -it <pod name> -- bash` - Execute a command in a pod
