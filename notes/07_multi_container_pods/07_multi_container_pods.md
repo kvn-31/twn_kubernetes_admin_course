@@ -48,4 +48,3 @@
 - example: in sidecar we might need information about the pod/cluster
 - pod configuration is available to access -> accessible in each container, but needs to be passed
 - see [documentation](https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/)
-- 

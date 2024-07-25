@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template: # template for the pods
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - mountPath: /var/log
+              name: log-data
+          command: ['sh', '-c']
+          args: # simulate some app logs # >> appends every line to the log file
+            - while true; do
+              echo "$(date) INFO some app data" >> /var/log/myapp.log;
+              sleep 5;
+              done
+        - name: log-sidecar
+          image: busybox:1.28
+          command: ["sh", "-c"]
+          args:
+            - tail -f /var/sidecar/myapp.log; # tail the log file
+          volumeMounts:
+            - mountPath: /var/sidecar # can be different as it is inside the container
+              name: log-data
+      volumes:
+        - name: log-data
+          emptyDir: {}

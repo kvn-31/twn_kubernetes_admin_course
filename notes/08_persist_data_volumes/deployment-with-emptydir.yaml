@@ -1,0 +1,44 @@
+## taken from the twn github repo
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+  labels:
+    app: my-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - name: my-app
+          image: busybox:1.28
+          command: ['sh', '-c']
+          args: # simulate some app logs
+            - while true; do
+              echo "$(date) INFO some app data" >> /var/log/myapp.log; # appends every line to the log file
+              sleep 5;
+              done
+
+          volumeMounts:
+            - name: log
+              mountPath: /var/log
+
+        - name: log-sidecar
+          image: busybox:1.28
+          command: ['sh', '-c']
+          args:
+            - tail -f /var/log/myapp.log # tail the log file
+
+          volumeMounts:
+            - name: log
+              mountPath: /var/log # can be different as it is inside the container
+
+      volumes:
+        - name: log
+          emptyDir: {}
