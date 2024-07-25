@@ -44,3 +44,8 @@
 - running `kubectl get pods` shows Init:0/1 -> not ready yet status
 - can be logged into with `kubectl logs PODNAME -c mydb-available`
 
+## Exposing Pod and Cluster Vars to Containers
+- example: in sidecar we might need information about the pod/cluster
+- pod configuration is available to access -> accessible in each container, but needs to be passed
+- see [documentation](https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/)
+- 

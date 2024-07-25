@@ -17,6 +17,10 @@
 - `kubectl get <component type> --show-labels` - List all components with the labels
 - `kubectl get <component type> -l <label>` - List all components with a specific label
 
+### DELETE
+- `kubectl delete <component type> <name>` - Delete a component
+- `for p in $(kubectl get pods | grep Terminating | awk '{print $1}'); do kubectl delete pod $p --grace-period=0 --force;done` - Delete all pods that are in the Terminating state
+
 ### DESCRIBE
 - `kubectl describe <component type> <name>` detailed information about a component
 

@@ -21,7 +21,26 @@ spec:
             - containerPort: 80
         - name: log-sidecar
           image: busybox:1.28
-          command: ["sh", "-c", "while true; do echo sync app logs; sleep 20; done"]
+          command: ["sh", "-c"]
+          args:
+            - while true; do
+                echo sync app logs;
+                printenv POD_NAME POD_SERVICE_ACCOUNT POD_IP;
+                sleep 20;
+              done;
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name #get value from pod config metadata.name
+            - name: POD_SERVICE_ACCOUNT
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.serviceAccountName #get value from pod config spec.serviceAccountName
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP #get value from pod config status.podIP
       initContainers:
         - name: mydb-available
           image: busybox:1.28
