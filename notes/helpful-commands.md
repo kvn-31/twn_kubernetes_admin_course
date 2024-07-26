@@ -46,6 +46,9 @@
 ### ROLLOUT
 - `kubectl rollout history <component type> <component-name>` - Show the history of a deployment, daemonset, or statefulset
 
+### LABEL
+- `kubectl label <component type> <component-name> <label-key>=<label-value>` - Add a label to a component
+
 ### AUTH
 - `kubectl auth can-i get pods --as <user>` - Check if a user can get pods
 

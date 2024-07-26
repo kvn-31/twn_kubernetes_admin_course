@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  replicas: 5
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      # no pods with app: myapp label can be scheduled on the same node
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - myapp
+              topologyKey: "kubernetes.io/hostname"
+        # there needs to be at least one pod with the label app=etcd running on the node(s) where the pod is scheduled
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - etcd
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: myapp-container
+          image: nginx:1.24
+      nodeSelector:
+        type: control-plane
+      tolerations:
+        - effect: NoExecute
+          operator: Exists
