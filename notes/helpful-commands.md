@@ -20,6 +20,7 @@
 - `kubectl get svc -o yaml` - Get the service in yaml format -> shows auto generated fields
 - `kubectl get <component type> --show-labels` - List all components with the labels
 - `kubectl get <component type> -l <label>` - List all components with a specific label
+- `kubectl get pod -o jsonpath="{range .items[*]}{.metadata.name}{.spec.containers[*].resources}{'\n'}"` - Get the resources of the pods
 
 ### DELETE
 - `kubectl delete <component type> <name>` - Delete a component
