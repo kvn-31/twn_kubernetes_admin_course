@@ -43,8 +43,14 @@
 ### SCALE
 - `kubectl scale deployment <deployment-name> --replicas=<number>` instead of applying an adapted deployment file
 
+### REPLICASET
+- `kubectl get rs` - List all ReplicaSets
+
 ### ROLLOUT
 - `kubectl rollout history <component type> <component-name>` - Show the history of a deployment, daemonset, or statefulset
+- `kubectl rollout undo deployment NAME` -> roll back to the previous version
+- `kubectl rollout undo deployment NAME --to-revision=2` -> roll back to a specific revision
+- `kubectl rollout status deployment NAME` -> shows the status of the rollout
 
 ### LABEL
 - `kubectl label <component type> <component-name> <label-key>=<label-value>` - Add a label to a component
