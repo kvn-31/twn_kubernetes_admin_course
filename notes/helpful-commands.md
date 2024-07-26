@@ -6,6 +6,10 @@
   - quick hack for vim is to use `dd` to delete a line
 - `kubectl cluster-info` for ip addresses of control plane and CoreDns 
 
+### APPLY
+- `kubectl apply -f <file>` - Apply a configuration file
+- `kubectl apply -f <directory>` - Apply all configuration files in a directory (use `.` for current directory)
+
 ### GET
 - `kubectl get pods` - List all pods in the current namespace
 - `kubectl get pods -n kube-system` - List all pods in the kube-system namespace

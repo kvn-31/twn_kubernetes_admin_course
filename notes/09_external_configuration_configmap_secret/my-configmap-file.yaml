@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp-config-file
+data:
+  mysql.conf: | # use the pipe symbol to create a multiline value
+    [mysqld]
+    port=3306
+    socket=/tmp/mysql.sock
+    key_buffer_size=16M
+    max_allowed_packet=128M
+  another.conf: | # multiple files can be stored in the same configmap
+    bla=bla
