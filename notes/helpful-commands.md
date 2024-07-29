@@ -77,3 +77,11 @@
 - `helm ls` - List all helm releases
 - `helm install <release-name> <chart-name>` - Install a helm chart
 - `helm uninstall <release-name>` - Uninstall a helm release
+
+## ETCDL
+- install etcdctl: `apt install etcd-client`
+- `sudo ETCDCTL_API=3 etcdctl snapshot save /tmp/etcd-backup.db --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert /etc/kubernetes/pki/etcd/server.crt --key /etc/kubernetes/pki/etcd/server.key`
+  - to backup using a specified API version (check with `etcdctl version`)
+  - specifying the certificates
+- `sudo ETCDCTL_API=3 etcdctl snapshot status /tmp/etcd-backup.db --write-out=table`  check the status of the backup to check if it has actual data in it
+### 
