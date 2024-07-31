@@ -40,6 +40,12 @@
 ### EXEC
 - `kubectl exec -it <pod name> -- bash` - Execute a command in a pod
 
+### CONFIG
+- `kubectl config get-contexts` -> shows all contexts
+- `kubectl config current-context` -> shows the current context
+- `kubectl config use-context <context-name>` -> sets the current context
+- `kubectl config set-context --current --namespace=kube-system` -> sets the namespace for the current context to kube-system
+
 ### SCALE
 - `kubectl scale deployment <deployment-name> --replicas=<number>` instead of applying an adapted deployment file
 
@@ -84,4 +90,6 @@
   - to backup using a specified API version (check with `etcdctl version`)
   - specifying the certificates
 - `sudo ETCDCTL_API=3 etcdctl snapshot status /tmp/etcd-backup.db --write-out=table`  check the status of the backup to check if it has actual data in it
-### 
+
+## Kubeadm
+- `sudo kubeadm certs check-expiration` -> checks the expiration of the certificates
