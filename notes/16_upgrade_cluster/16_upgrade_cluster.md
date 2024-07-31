@@ -65,7 +65,7 @@ apt-mark hold kubeadm # fixates the version
 - `kubeadm version` -> check the version
 - `kubeadm upgrade plan` -> check the upgrade plan and gives command to upgrade (version might need to be adjusted as needed)
 - `kubeadm upgrade apply v1.x.x` 
-- done, now update kubelet
+- done, now update kubelet, switch back to normal user (just for next command)
 - `kubectl drain controlplane` (might need `--ignore-daemonsets`)
 ```bash
 apt-mark unhold kubelet kubectl && \

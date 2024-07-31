@@ -53,6 +53,8 @@ There are many things that can go wrong, this section will show the most ways to
   - `kubectl get pods -o custom-columns=POD_NAME:.metadata.name,POD_IP:.status.podIP,CREATED_AT:.status.startTime` to get pod name, pod ip, start time
 
 ## Troubleshoot Kubelet and Kubectl issues
+- generally it makes sense to check the logs `journalctl -u kubelet -f`
+- faced the issue that containerd had permission problems on ubuntu, [see this solution](https://www.reddit.com/r/kubernetes/comments/1byq52f/comment/lb7h1wc/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button)
 
 ### Worker Node is in NotReady State
 - most probably the kubelet is not running
@@ -68,5 +70,4 @@ There are many things that can go wrong, this section will show the most ways to
   - certificate-authority-data -> copy and decode, compare to the actual certificate sitting in the `/etc/kubernetes/pki` directory
   - server -> go to control plane or AWS console -> check if the ip address is the same
   - issue found? -> vim ~/.kube/config and fix the issue -> should work now
-
-
+ 
