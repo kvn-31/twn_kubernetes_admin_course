@@ -52,6 +52,9 @@
 ### REPLICASET
 - `kubectl get rs` - List all ReplicaSets
 
+### EXPOSE
+- `kubectl expose deployment nginx-deployment --type=NodePort --name=nginx-service` - Expose a deployment as a nodeport service
+
 ### ROLLOUT
 - `kubectl rollout history <component type> <component-name>` - Show the history of a deployment, daemonset, or statefulset
 - `kubectl rollout undo deployment NAME` -> roll back to the previous version
